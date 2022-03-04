@@ -6,10 +6,10 @@ namespace iwd {
 std::unique_ptr<Adapter> Adapter::CreateFromProxy(
     const base::dbus::ObjectProxy& ns) {
   return ns.Create<Adapter, std::string, std::string, std::string, bool>(
-    "Model", "Name", "Vendor", "Powered");
+      "Model", "Name", "Vendor", "Powered");
 }
 
-Adapter::Adapter(std::unique_ptr<base::dbus::ObjectProxy> self,
+Adapter::Adapter(base::dbus::ObjectProxy::Storage self,
                  std::string model,
                  std::string name,
                  std::string vendor,
@@ -23,16 +23,16 @@ Adapter::Adapter(std::unique_ptr<base::dbus::ObjectProxy> self,
 
 std::unique_ptr<Device> Device::CreateFromProxy(
     const base::dbus::ObjectProxy& ns) {
-  return ns.Create<Device, std::string, std::string, bool, 
+  return ns.Create<Device, std::string, std::string, bool,
                    typename base::dbus::ObjectProxy::Storage>(
-    "Address", "Name", "Powered", "Adapter");
+      "Address", "Name", "Powered", "Adapter");
 }
 
-Device::Device(std::unique_ptr<base::dbus::ObjectProxy> self,
+Device::Device(base::dbus::ObjectProxy::Storage self,
                std::string address,
                std::string name,
                bool powered,
-               std::unique_ptr<base::dbus::ObjectProxy> adapter) {
+               base::dbus::ObjectProxy::Storage adapter) {
   self_ = std::move(self);
   address_ = address;
   name_ = name;
@@ -46,12 +46,12 @@ std::unique_ptr<Adapter> Device::GetAdapter() {
 
 std::unique_ptr<KnownNetwork> KnownNetwork::CreateFromProxy(
     const base::dbus::ObjectProxy& ns) {
-  return ns.Create<KnownNetwork, std::string, std::string, std::string,
-                   bool, bool>(
-    "Type", "Name", "LastConnectedTime", "Hidden", "AutoConnect");
+  return ns
+      .Create<KnownNetwork, std::string, std::string, std::string, bool, bool>(
+          "Type", "Name", "LastConnectedTime", "Hidden", "AutoConnect");
 }
 
-KnownNetwork::KnownNetwork(std::unique_ptr<base::dbus::ObjectProxy> self,
+KnownNetwork::KnownNetwork(base::dbus::ObjectProxy::Storage self,
                            std::string type,
                            std::string name,
                            std::string last_connected_time,
@@ -69,16 +69,16 @@ std::unique_ptr<Network> Network::CreateFromProxy(
     const base::dbus::ObjectProxy& ns) {
   return ns.Create<Network, std::string, std::string, bool,
                    typename base::dbus::ObjectProxy::Storage,
-                   typename base::dbus::ObjectProxy::Storage>(
-    "Type", "Name", "Connected", "KnownNetwork", "Device");
+                   typename base::dbus::ObjectProxy::MaybeStorage>(
+      "Type", "Name", "Connected", "Device", "KnownNetwork");
 }
 
-Network::Network(std::unique_ptr<base::dbus::ObjectProxy> self,
+Network::Network(base::dbus::ObjectProxy::Storage self,
                  std::string type,
                  std::string name,
                  bool connected,
-                 std::unique_ptr<base::dbus::ObjectProxy> known_network,
-                 std::unique_ptr<base::dbus::ObjectProxy> device) {
+                 base::dbus::ObjectProxy::Storage device,
+                 base::dbus::ObjectProxy::MaybeStorage known_network) {
   self_ = std::move(self);
   type_ = type;
   name_ = name;
@@ -91,35 +91,48 @@ std::unique_ptr<Device> Network::GetDevice() {
   return Device::CreateFromProxy(*device_);
 }
 
-std::unique_ptr<KnownNetwork> Network::GetKnownNetwork() {
-  return KnownNetwork::CreateFromProxy(*known_network_);
+std::optional<std::unique_ptr<KnownNetwork>> Network::GetKnownNetwork() {
+  if (!known_network_.has_value())
+    return std::nullopt;
+  return KnownNetwork::CreateFromProxy(**known_network_);
 }
 
 std::unique_ptr<Station> Station::CreateFromProxy(
     const base::dbus::ObjectProxy& ns) {
   return ns.Create<Station, std::string, bool,
-                   typename base::dbus::ObjectProxy::Storage> (
-    "State", "Scanning", "ConnectedNetwork");
+                   typename base::dbus::ObjectProxy::MaybeStorage>(
+      "State", "Scanning", "ConnectedNetwork");
 }
 
-Station::Station(std::unique_ptr<base::dbus::ObjectProxy> self,
+Station::Station(base::dbus::ObjectProxy::Storage self,
                  std::string state,
                  bool scanning,
-                 std::unique_ptr<base::dbus::ObjectProxy> network) {
+                 base::dbus::ObjectProxy::MaybeStorage network) {
   self_ = std::move(self);
   state_ = state;
   scanning_ = scanning;
   network_ = std::move(network);
 }
 
-std::unique_ptr<Network> Station::GeConnectedNetwork() {
-  return Network::CreateFromProxy(*network_);
+std::optional<std::unique_ptr<Network>> Station::GetConnectedNetwork() {
+  if (!network_.has_value())
+    return std::nullopt;
+  return Network::CreateFromProxy(**network_);
 }
 
 std::vector<std::unique_ptr<Network>> Station::GetOrderedNetworks() {
-  self_->Call("GetOrderedNetworks");
+  using Element = std::tuple<std::unique_ptr<Network>, ssize_t>;
 
-  return {};
+  auto entries = self_->Call<std::vector<Element>>("GetOrderedNetworks");
+  if (!entries.has_value())
+    return {};
+
+  std::vector<std::unique_ptr<Network>> result;
+  for (auto& tups : std::move(entries).value()) {
+    result.push_back(std::get<0>(std::move(tups)));
+  }
+
+  return result;
 }
 
 }  // namespace iwd

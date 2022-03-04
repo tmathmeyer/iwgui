@@ -15,17 +15,6 @@ cpp_object (
     "//base/dbus:dbus",
     "//base/dbus:dbus_headers",
   ],
-  include_dirs = [
-    "/usr/lib/dbus-1.0/include",
-    "/usr/include/dbus-1.0",
-    "/usr/include/glib-2.0",
-    "/usr/lib/glib-2.0/include",
-  ],
-  flags = [
-    "-ldbus-glib-1",
-    "-ldbus-1",
-    "-lglib-2.0",
-  ],
 )
 
 cpp_binary (
@@ -37,15 +26,39 @@ cpp_binary (
     "//base/dbus:dbus",
     "//base/dbus:dbus_headers",
   ],
-  include_dirs = [
-    "/usr/lib/dbus-1.0/include",
-    "/usr/include/dbus-1.0",
-    "/usr/include/glib-2.0",
-    "/usr/lib/glib-2.0/include",
+)
+
+
+
+cpp_header (
+  name = "panels_header",
+  srcs = [ "panels.h" ],
+  deps = [
+    ":iwd_types_h",
+    "//base/dbus:dbus_headers",
+    "//xpp/gfx:graphics_header",
+    "//xpp/ui:ui_include",
+  ]
+)
+
+cpp_object (
+  name = "panels",
+  srcs = [ "panels.cc" ],
+  deps = [
+    ":iwd_types",
+    ":panels_header",
   ],
-  flags = [
-    "-ldbus-glib-1",
-    "-ldbus-1",
-    "-lglib-2.0",
+)
+
+cpp_binary (
+  name = "iwgui",
+  srcs = [ "iwgui.cc" ],
+  deps = [
+    ":panels",
+    ":panels_header",
+    "//base/dbus:dbus",
+    "//base/dbus:dbus_headers",
+    "//xpp/ui:ui_include",
+    "//xpp/ui:window",
   ],
 )
