@@ -59,6 +59,7 @@ class WifiMenuPanel {
   };
 
   DECLARE_FRAME_METHODS();
+  xpp::gfx::Rect GetPreferredSize();
   WifiMenuSection* GetSection(size_t index);
   void Reset();
 

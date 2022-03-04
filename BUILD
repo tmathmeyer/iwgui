@@ -17,19 +17,6 @@ cpp_object (
   ],
 )
 
-cpp_binary (
-  name = "printer",
-  srcs = [ "printer.cc" ],
-  deps = [
-    ":iwd_types_h",
-    ":iwd_types",
-    "//base/dbus:dbus",
-    "//base/dbus:dbus_headers",
-  ],
-)
-
-
-
 cpp_header (
   name = "panels_header",
   srcs = [ "panels.h" ],
@@ -56,9 +43,21 @@ cpp_binary (
   deps = [
     ":panels",
     ":panels_header",
+    "//base/args:argparse",
     "//base/dbus:dbus",
     "//base/dbus:dbus_headers",
     "//xpp/ui:ui_include",
     "//xpp/ui:window",
+  ],
+)
+
+cpp_binary (
+  name = "printer",
+  srcs = [ "printer.cc" ],
+  deps = [
+    ":iwd_types_h",
+    ":iwd_types",
+    "//base/dbus:dbus",
+    "//base/dbus:dbus_headers",
   ],
 )

@@ -9,6 +9,16 @@ WifiMenuPanel::WifiMenuPanel(std::shared_ptr<base::dbus::Connection> connection)
   Reset();
 }
 
+xpp::gfx::Rect WifiMenuPanel::GetPreferredSize() {
+  ssize_t margin = 12;
+  ssize_t height = margin / 2;
+  for (const auto& section : sections_) {
+    height += std::get<0>(section)->Height();
+    height += margin;
+  }
+  return {500, height};
+}
+
 WifiMenuPanel::WifiMenuSection* WifiMenuPanel::GetSection(size_t index) {
   while (index + 1 > sections_.size()) {
     WifiMenuPanel::WifiMenuSection* new_entry;
@@ -90,7 +100,8 @@ void WifiMenuPanel::Reset() {
   section->Erase();
   station_->Scan();
   for (auto& net : station_->GetOrderedNetworks()) {
-    section->CreateNextEntry(std::move(net));
+    if (net)
+      section->CreateNextEntry(std::move(net));
   }
 }
 
@@ -102,6 +113,14 @@ WifiMenuPanel::WifiMenuEntry::WifiMenuEntry(
 
 void WifiMenuPanel::WifiMenuEntry::OnPaint(xpp::ui::WindowProxy win,
                                            xpp::gfx::Graphics g) {
+  if (!this) {
+    puts("OH SHIT");
+    return;
+  }
+  if (!displayed_network_) {
+    puts("NO NETWORK");
+    return;
+  }
   if (hovered_) {
     g.SetColor(xpp::gfx::SDRColor::BLUE);
   } else {
