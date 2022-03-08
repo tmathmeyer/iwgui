@@ -8,12 +8,11 @@ int main() {
     return -1;
   }
 
-  
   std::unique_ptr<iwd::Station> station = conn->GetInterface<iwd::Station>(
       "net.connman.iwd", "/net/connman/iwd/0/4");
 
   auto connected = station->GetConnectedNetwork();
-  
+
   std::string name = "disconnected";
   if (connected.has_value())
     name = connected.value()->Name();
@@ -31,5 +30,4 @@ int main() {
       std::cout << "  ";
     std::cout << net->Name() << "\n";
   }
-  
 }

@@ -1,31 +1,21 @@
 
 #include "base/args/argparse.h"
 #include "base/dbus/dbus.h"
+#include "base/tracing/trace.h"
 #include "panels.h"
 #include "xpp/ui/window.h"
 
 int main(int argc, char** argv) {
-  std::tuple<int, int, int> x_y_w;
-  {
-    Flag(Example, "--display", "-d",
-         "Draw an iwgui window somewhere on the screen");
-    NamedType(x, int);
-    NamedType(y, int);
-    NamedType(w, int);
-    Arg(Example, x, y, w);
-    auto args = argparse::GetParseTuple<Example>(argc, argv);
-    if (!args.has_value()) {
-      argparse::DisplayHelp<Example>(std::cout);
-      return 1;
-    }
-    x_y_w = std::move(args).value();
-  }
+  auto mons = xpp::ui::XDisplay::GetMonitorSizes();
+  if (mons.size() == 0)
+    return 1;
 
+  auto dimensions = mons.begin()->second;
   auto window =
       xpp::ui::Window::Create(xpp::ui::Window::Positioning::kFixedPosition,
-                              xpp::ui::Window::PositionPin::kTopLeft,
-                              xpp::gfx::Rect(std::get<2>(x_y_w), 1),
-                              {std::get<0>(x_y_w), std::get<1>(x_y_w)});
+                              xpp::ui::Window::PositionPin::kTopCenter,
+                              /*size=*/{400, 1},
+                              /*position=*/{dimensions.width / 2, 0});
 
   window.SetDefaultFrame(xpp::ui::FrameFactory<iwgui::WifiMenuPanel>::MakeFrame(
       base::dbus::Connection::GetSystemConnection()));

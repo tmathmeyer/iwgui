@@ -60,6 +60,9 @@ void WifiMenuPanel::OnKey(xpp::ui::WindowProxy win,
                           int code) {}
 
 void WifiMenuPanel::OnMotion(xpp::ui::WindowProxy win, xpp::gfx::Coord at) {
+  if (at.x == 0 || at.y == 0) {
+    win.Close();
+  }
   ssize_t bottom = 0;
   const auto& section = GetSectionAt(at, &bottom);
   if (bottom != -1)

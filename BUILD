@@ -46,6 +46,8 @@ cpp_binary (
     "//base/args:argparse",
     "//base/dbus:dbus",
     "//base/dbus:dbus_headers",
+    "//base/tracing:trace_h",
+    "//base/tracing:tracing",
     "//xpp/ui:ui_include",
     "//xpp/ui:window",
   ],
