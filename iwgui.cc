@@ -12,7 +12,7 @@ int main(int argc, char** argv) {
 
   auto dimensions = mons.begin()->second;
   auto window =
-      xpp::ui::Window::Create(xpp::ui::Window::Positioning::kFixedPosition,
+      xpp::ui::Window::Create(xpp::ui::Window::WindowType::kDesktopDock,
                               xpp::ui::Window::PositionPin::kTopCenter,
                               /*size=*/{400, 1},
                               /*position=*/{dimensions.width / 2, 0});

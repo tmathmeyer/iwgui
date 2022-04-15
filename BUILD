@@ -25,6 +25,7 @@ cpp_header (
     "//base/dbus:dbus_headers",
     "//xpp/gfx:graphics_header",
     "//xpp/ui:ui_include",
+    "//xpp/ui/component:component_include",
   ]
 )
 
@@ -34,6 +35,7 @@ cpp_object (
   deps = [
     ":iwd_types",
     ":panels_header",
+    "//xpp/ui/component:container_utils",
   ],
 )
 

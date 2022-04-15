@@ -9,9 +9,31 @@ WifiMenuPanel::WifiMenuPanel(std::shared_ptr<base::dbus::Connection> connection)
   Reset();
 }
 
+const xpp::component::Container::Packs& WifiMenuPanel::ContainerPacks(
+    const xpp::ui::WindowProxy& w) {
+  static xpp::component::Container::Packs packs;
+  constexpr ssize_t margin = 12;
+
+  if (!packs.empty())
+    packs.clear();
+
+  xpp::gfx::Coord top_left = {margin / 2, margin / 2};
+  for (const auto& section : sections_) {
+    xpp::gfx::Coord tlc = top_left;
+    uint32_t section_height = std::get<0>(section)->Height();
+    packs.push_back(
+        std::make_tuple<xpp::ui::Frame*, xpp::gfx::Coord, xpp::gfx::Rect>(
+            std::get<1>(section).get(), std::move(tlc),
+            {w.GetFrameSize().width, section_height}));
+    top_left = {top_left.x, top_left.y + section_height + margin};
+  }
+
+  return packs;
+}
+
 xpp::gfx::Rect WifiMenuPanel::GetPreferredSize() {
-  ssize_t margin = 12;
-  ssize_t height = margin / 2;
+  uint32_t margin = 12;
+  uint32_t height = margin / 2;
   for (const auto& section : sections_) {
     height += std::get<0>(section)->Height();
     height += margin;
@@ -21,13 +43,10 @@ xpp::gfx::Rect WifiMenuPanel::GetPreferredSize() {
 
 WifiMenuPanel::WifiMenuSection* WifiMenuPanel::GetSection(size_t index) {
   while (index + 1 > sections_.size()) {
-    WifiMenuPanel::WifiMenuSection* new_entry;
-    auto new_frame =
+    std::tuple<WifiMenuPanel::WifiMenuSection*, xpp::ui::FramePtr> new_frame =
         xpp::ui::FrameFactory<WifiMenuPanel::WifiMenuSection>::CaptureFrame(
-            &new_entry, this);
-    sections_.push_back(
-        std::make_tuple<WifiMenuPanel::WifiMenuSection*, xpp::ui::FramePtr>(
-            std::move(new_entry), std::move(new_frame)));
+            this);
+    sections_.push_back(std::move(new_frame));
   }
   return std::get<0>(sections_[index]);
 }
@@ -35,67 +54,28 @@ WifiMenuPanel::WifiMenuSection* WifiMenuPanel::GetSection(size_t index) {
 void WifiMenuPanel::OnPaint(xpp::ui::WindowProxy win, xpp::gfx::Graphics g) {
   g.SetColor(xpp::gfx::SDRColor::GRAY8);
   g.FillRect(0, 0, g.size().width, g.size().height);
-  ssize_t margin = 12;
-  ssize_t top = margin / 2;
-  bool drawn_first = false;
-  for (const auto& section : sections_) {
-    if (drawn_first) {
-      g.SetColor(xpp::gfx::SDRColor::GRAY3);
-      g.FillRect(margin, top, g.size().width - margin * 2, 1);
-    }
-    drawn_first = true;
-    if (g.size().width < (margin * 2))
-      return;
-    top += margin / 2 + 1;
-    auto subg = g.SubArea({margin, top}, {g.size().width - (margin * 2),
-                                          std::get<0>(section)->Height()});
-    std::get<1>(section)->Draw(win, std::move(subg));
-    top += std::get<0>(section)->Height();
-    top += margin / 2;
-  }
+  xpp::component::Container::PropagateDraw(ContainerPacks(win), win, g);
 }
 
-void WifiMenuPanel::OnKey(xpp::ui::WindowProxy win,
-                          xpp::ui::KeyEvent ev,
-                          int code) {}
-
-void WifiMenuPanel::OnMotion(xpp::ui::WindowProxy win, xpp::gfx::Coord at) {
-  if (at.x == 0 || at.y == 0) {
-    win.Close();
-  }
-  ssize_t bottom = 0;
-  const auto& section = GetSectionAt(at, &bottom);
-  if (bottom != -1)
-    std::get<1>(section)->NotifyMotion(win, {at.x, at.y - bottom});
+bool WifiMenuPanel::OnMouseMotion(xpp::ui::MotionEvent e) {
+  return xpp::component::Container::PropagateMotion(ContainerPacks(e.Window()),
+                                                    std::move(e));
 }
 
-void WifiMenuPanel::OnClick(xpp::ui::WindowProxy win,
-                            xpp::ui::MouseButton button,
-                            xpp::ui::ButtonAction action,
-                            xpp::gfx::Coord at) {
-  ssize_t bottom = 0;
-  const auto& section = GetSectionAt(at, &bottom);
-  if (bottom != -1)
-    std::get<1>(section)->NotifyClick(win, button, action,
-                                      {at.x, at.y - bottom});
+void WifiMenuPanel::OnMouseEntered(xpp::ui::EnterEvent e) {
+  xpp::component::Container::PropagateEntry(ContainerPacks(e.Window()),
+                                            std::move(e));
 }
 
-const std::tuple<WifiMenuPanel::WifiMenuSection*, xpp::ui::FramePtr>&
-WifiMenuPanel::GetSectionAt(xpp::gfx::Coord at, ssize_t* bottom) {
-  static auto empty =
-      std::make_tuple<WifiMenuPanel::WifiMenuSection*, xpp::ui::FramePtr>(
-          nullptr, nullptr);
-  ssize_t margin = 12;
-  *bottom = margin / 2;
-  ssize_t top = *bottom;
-  for (const auto& section : sections_) {
-    top += std::get<0>(section)->Height();
-    if (at.y > *bottom && at.y < top)
-      return section;
-    *bottom = top + margin;
-  }
-  *bottom = -1;
-  return empty;
+void WifiMenuPanel::OnMouseExited(xpp::ui::ExitEvent e) {
+  xpp::component::Container::PropagateExit(ContainerPacks(e.Window()),
+                                           std::move(e));
+  e.Window().Close();
+}
+
+bool WifiMenuPanel::OnClick(xpp::ui::ClickEvent e) {
+  return xpp::component::Container::PropagateClick(ContainerPacks(e.Window()),
+                                                   std::move(e));
 }
 
 void WifiMenuPanel::Reset() {
@@ -116,66 +96,79 @@ WifiMenuPanel::WifiMenuEntry::WifiMenuEntry(
 
 void WifiMenuPanel::WifiMenuEntry::OnPaint(xpp::ui::WindowProxy win,
                                            xpp::gfx::Graphics g) {
-  if (!this) {
-    puts("OH SHIT");
-    return;
-  }
-  if (!displayed_network_) {
-    puts("NO NETWORK");
-    return;
-  }
   if (hovered_) {
     g.SetColor(xpp::gfx::SDRColor::BLUE);
   } else {
     g.SetColor(xpp::gfx::SDRColor::BLACK);
   }
   g.SetFont("Fantasque Sans Mono", 8);
-  int text_height = g.RealFontHeight();
-  g.DrawText(20,
-             (text_height + WifiMenuPanel::WifiMenuEntry::kLineHeight) / 2 - 8,
-             displayed_network_->Name());
+  g.DrawText(20, 0, displayed_network_->Name());
   if (displayed_network_->Connected()) {
     g.FillRect(7, 27, 6, 6);
   }
 }
 
-void WifiMenuPanel::WifiMenuEntry::OnKey(xpp::ui::WindowProxy win,
-                                         xpp::ui::KeyEvent ev,
-                                         int code) {}
+bool WifiMenuPanel::WifiMenuEntry::OnMouseMotion(xpp::ui::MotionEvent e) {
+  return false;
+}
 
-void WifiMenuPanel::WifiMenuEntry::OnMotion(xpp::ui::WindowProxy win,
-                                            xpp::gfx::Coord at) {}
-
-void WifiMenuPanel::WifiMenuEntry::OnClick(xpp::ui::WindowProxy win,
-                                           xpp::ui::MouseButton button,
-                                           xpp::ui::ButtonAction action,
-                                           xpp::gfx::Coord coord) {
-  if (action == xpp::ui::ButtonAction::kPress) {
+bool WifiMenuPanel::WifiMenuEntry::OnClick(xpp::ui::ClickEvent e) {
+  if (e.Action() != xpp::ui::ButtonAction::kPress)
+    return true;
+  std::cout << displayed_network_->Name() << "\n";
+  return true;
+  /*
+  if (e.Action() == xpp::ui::ButtonAction::kPress) {
     pressed_ = true;
   } else if (pressed_ && !displayed_network_->Connected()) {
     pressed_ = false;
     if (displayed_network_->GetKnownNetwork().has_value()) {
       displayed_network_->Connect();
       menu_panel_weak_ref_->Reset();
-      win.Repaint();
+      e.Window().Repaint();
     } else {
       std::cout << displayed_network_->Name() << " is not a known network\n";
     }
   }
+  return true;
+  */
 }
 
-void WifiMenuPanel::WifiMenuEntry::NotifyHoverMouseEnter() {
+void WifiMenuPanel::WifiMenuEntry::OnMouseEntered(xpp::ui::EnterEvent e) {
   hovered_ = true;
   pressed_ = false;
+  e.Window().Repaint();
 }
 
-void WifiMenuPanel::WifiMenuEntry::NotifyHoverMouseExit() {
+void WifiMenuPanel::WifiMenuEntry::OnMouseExited(xpp::ui::ExitEvent e) {
   hovered_ = false;
   pressed_ = false;
+  e.Window().Repaint();
 }
 
 WifiMenuPanel::WifiMenuSection::WifiMenuSection(WifiMenuPanel* menu_weak_ref)
     : menu_panel_weak_ref_(menu_weak_ref) {}
+
+const xpp::component::Container::Packs&
+WifiMenuPanel::WifiMenuSection::ContainerPacks(const xpp::ui::WindowProxy& w) {
+  static xpp::component::Container::Packs packs;
+  if (!packs.empty())
+    packs.clear();
+
+  xpp::gfx::Coord top_left = {0, 0};
+  for (const auto& entry : entries_) {
+    xpp::gfx::Coord tlc = top_left;
+    packs.push_back(
+        std::make_tuple<xpp::ui::Frame*, xpp::gfx::Coord, xpp::gfx::Rect>(
+            std::get<1>(entry).get(), std::move(tlc),
+            {w.GetFrameSize().width,
+             WifiMenuPanel::WifiMenuEntry::kLineHeight}));
+    top_left = {top_left.x,
+                top_left.y + WifiMenuPanel::WifiMenuEntry::kLineHeight};
+  }
+
+  return packs;
+}
 
 void WifiMenuPanel::WifiMenuSection::Erase() {
   entries_.clear();
@@ -187,74 +180,35 @@ uint32_t WifiMenuPanel::WifiMenuSection::Height() {
 
 WifiMenuPanel::WifiMenuEntry* WifiMenuPanel::WifiMenuSection::CreateNextEntry(
     std::unique_ptr<iwd::Network> network) {
-  WifiMenuPanel::WifiMenuEntry* new_entry;
-  auto new_frame =
-      xpp::ui::FrameFactory<WifiMenuPanel::WifiMenuEntry>::CaptureFrame(
-          &new_entry, std::move(network), menu_panel_weak_ref_);
   entries_.push_back(
-      std::make_tuple<WifiMenuPanel::WifiMenuEntry*, xpp::ui::FramePtr>(
-          std::move(new_entry), std::move(new_frame)));
+      xpp::ui::FrameFactory<WifiMenuPanel::WifiMenuEntry>::CaptureFrame(
+          std::move(network), menu_panel_weak_ref_));
   return std::get<0>(entries_[entries_.size() - 1]);
 }
 
 void WifiMenuPanel::WifiMenuSection::OnPaint(xpp::ui::WindowProxy win,
                                              xpp::gfx::Graphics g) {
-  ssize_t top = 0;
-  for (const auto& entry : entries_) {
-    auto subg = g.SubArea(
-        {0, top}, {g.size().width, WifiMenuPanel::WifiMenuEntry::kLineHeight});
-
-    std::get<1>(entry)->Draw(win, std::move(subg));
-    top += WifiMenuPanel::WifiMenuEntry::kLineHeight;
-  }
+  xpp::component::Container::PropagateDraw(ContainerPacks(win), win, g);
 }
 
-void WifiMenuPanel::WifiMenuSection::OnKey(xpp::ui::WindowProxy win,
-                                           xpp::ui::KeyEvent ev,
-                                           int code) {}
-
-void WifiMenuPanel::WifiMenuSection::OnMotion(xpp::ui::WindowProxy win,
-                                              xpp::gfx::Coord at) {
-  ssize_t bottom = 0;
-  ssize_t top = bottom;
-  for (const auto& entry : entries_) {
-    top += WifiMenuPanel::WifiMenuEntry::kLineHeight;
-    if (at.y > bottom && at.y < top) {
-      std::get<0>(entry)->NotifyHoverMouseEnter();
-    } else {
-      std::get<0>(entry)->NotifyHoverMouseExit();
-    }
-    bottom = top;
-  }
-  win.Repaint();
+bool WifiMenuPanel::WifiMenuSection::OnMouseMotion(xpp::ui::MotionEvent e) {
+  return xpp::component::Container::PropagateMotion(ContainerPacks(e.Window()),
+                                                    std::move(e));
 }
 
-void WifiMenuPanel::WifiMenuSection::OnClick(xpp::ui::WindowProxy win,
-                                             xpp::ui::MouseButton button,
-                                             xpp::ui::ButtonAction action,
-                                             xpp::gfx::Coord at) {
-  ssize_t bottom = 0;
-  const auto& entry = GetEntryAt(at, &bottom);
-  if (bottom != -1)
-    std::get<1>(entry)->NotifyClick(win, button, action, {at.x, at.y - bottom});
+void WifiMenuPanel::WifiMenuSection::OnMouseEntered(xpp::ui::EnterEvent e) {
+  xpp::component::Container::PropagateEntry(ContainerPacks(e.Window()),
+                                            std::move(e));
 }
 
-const std::tuple<WifiMenuPanel::WifiMenuEntry*, xpp::ui::FramePtr>&
-WifiMenuPanel::WifiMenuSection::GetEntryAt(xpp::gfx::Coord at,
-                                           ssize_t* bottom) {
-  static auto empty =
-      std::make_tuple<WifiMenuPanel::WifiMenuEntry*, xpp::ui::FramePtr>(
-          nullptr, nullptr);
-  *bottom = 0;
-  ssize_t top = *bottom;
-  for (const auto& entry : entries_) {
-    top += WifiMenuPanel::WifiMenuEntry::kLineHeight;
-    if (at.y > *bottom && at.y < top)
-      return entry;
-    *bottom = top;
-  }
-  *bottom = -1;
-  return empty;
+void WifiMenuPanel::WifiMenuSection::OnMouseExited(xpp::ui::ExitEvent e) {
+  xpp::component::Container::PropagateExit(ContainerPacks(e.Window()),
+                                           std::move(e));
+}
+
+bool WifiMenuPanel::WifiMenuSection::OnClick(xpp::ui::ClickEvent e) {
+  return xpp::component::Container::PropagateClick(ContainerPacks(e.Window()),
+                                                   std::move(e));
 }
 
 }  // namespace iwgui

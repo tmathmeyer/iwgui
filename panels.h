@@ -6,16 +6,17 @@
 
 #include "base/dbus/dbus.h"
 #include "xpp/gfx/graphics.h"
+#include "xpp/ui/component/container_utils.h"
 #include "xpp/ui/frame.h"
 
 namespace iwgui {
 
-#define DECLARE_FRAME_METHODS()                             \
-  void OnPaint(xpp::ui::WindowProxy, xpp::gfx::Graphics);   \
-  void OnKey(xpp::ui::WindowProxy, xpp::ui::KeyEvent, int); \
-  void OnMotion(xpp::ui::WindowProxy, xpp::gfx::Coord);     \
-  void OnClick(xpp::ui::WindowProxy, xpp::ui::MouseButton,  \
-               xpp::ui::ButtonAction, xpp::gfx::Coord)
+#define DECLARE_FRAME_METHODS()                           \
+  void OnPaint(xpp::ui::WindowProxy, xpp::gfx::Graphics); \
+  bool OnMouseMotion(xpp::ui::MotionEvent);               \
+  void OnMouseEntered(xpp::ui::EnterEvent);               \
+  void OnMouseExited(xpp::ui::ExitEvent);                 \
+  bool OnClick(xpp::ui::ClickEvent)
 
 class WifiMenuPanel {
  public:
@@ -23,8 +24,6 @@ class WifiMenuPanel {
    public:
     static constexpr uint32_t kLineHeight = 60;
     DECLARE_FRAME_METHODS();
-    void NotifyHoverMouseEnter();
-    void NotifyHoverMouseExit();
 
    private:
     friend struct xpp::ui::FrameFactory<WifiMenuEntry>;
@@ -50,9 +49,8 @@ class WifiMenuPanel {
 
     WifiMenuSection(WifiMenuPanel*);
 
-    const std::tuple<WifiMenuEntry*, xpp::ui::FramePtr>& GetEntryAt(
-        xpp::gfx::Coord,
-        ssize_t*);
+    const xpp::component::Container::Packs& ContainerPacks(
+        const xpp::ui::WindowProxy&);
 
     std::vector<std::tuple<WifiMenuEntry*, xpp::ui::FramePtr>> entries_;
     WifiMenuPanel* menu_panel_weak_ref_;
@@ -67,9 +65,8 @@ class WifiMenuPanel {
   friend struct xpp::ui::FrameFactory<WifiMenuPanel>;
   WifiMenuPanel(std::shared_ptr<base::dbus::Connection>);
 
-  const std::tuple<WifiMenuSection*, xpp::ui::FramePtr>& GetSectionAt(
-      xpp::gfx::Coord,
-      ssize_t*);
+  const xpp::component::Container::Packs& ContainerPacks(
+      const xpp::ui::WindowProxy&);
 
   std::shared_ptr<base::dbus::Connection> dbus_connection_;
   std::unique_ptr<iwd::Station> station_;
