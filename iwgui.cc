@@ -1,9 +1,11 @@
 
-#include "base/args/argparse.h"
 #include "base/dbus/dbus.h"
 #include "base/tracing/trace.h"
-#include "panels.h"
 #include "xpp/ui/window.h"
+
+#include "gui/device_frame.h"
+#include "gui/station_frame.h"
+#include "gui/wifi_frame.h"
 
 int main(int argc, char** argv) {
   auto mons = xpp::ui::XDisplay::GetMonitorSizes();
@@ -14,10 +16,10 @@ int main(int argc, char** argv) {
   auto window =
       xpp::ui::Window::Create(xpp::ui::Window::WindowType::kDesktopDock,
                               xpp::ui::Window::PositionPin::kTopCenter,
-                              /*size=*/{400, 1},
+                              /*size=*/{400, 400},
                               /*position=*/{dimensions.width / 2, 0});
 
-  window.SetDefaultFrame(xpp::ui::FrameFactory<iwgui::WifiMenuPanel>::MakeFrame(
+  window.SetDefaultFrame(xpp::ui::FrameFactory<iwgui::MainFrame>::MakeFrame(
       base::dbus::Connection::GetSystemConnection()));
 
   std::move(window).SetVisibleAndStartEventLoop();
