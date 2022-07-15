@@ -12,6 +12,7 @@ cpp_header (
     "//iwgui/iwd:types_h",
     "//base/dbus:dbus_headers",
     "//xpp/gfx:graphics_header",
+    "//xpp/ui/container:container_include",
     "//xpp/ui/component:component_include",
   ]
 )
@@ -45,7 +46,7 @@ cpp_object (
     ":ui_headers",
     ":ssid_frame",
     "//xpp/ui/component:text_panel",
-    "//xpp/ui/component:stack_panel",
+    "//xpp/ui/container:stack_panel",
     "//xpp/ui/component:button",
   ],
 )

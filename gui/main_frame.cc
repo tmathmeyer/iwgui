@@ -1,7 +1,7 @@
 
+#include "main_frame.h"
 #include "device_frame.h"
 #include "station_frame.h"
-#include "wifi_frame.h"
 #include "xpp/ui/component/line_break_panel.h"
 
 namespace iwgui {
@@ -9,31 +9,31 @@ namespace iwgui {
 void MainFrame::OnPaint(xpp::ui::WindowProxy w, xpp::gfx::Graphics g) {
   g.SetColor(w.WindowLaF()->FrameBackgroundColor);
   g.FillRect(0, 0, g.size().width, g.size().height);
-  xpp::component::Container::PropagateDraw(GetLayout(w), w, g);
+  xpp::container::Container::PropagateDraw(GetLayout(w), w, g);
 }
 
 void MainFrame::OnMouseExited(xpp::ui::ExitEvent e) {
   e.Window().Close();
-  xpp::component::Container::PropagateExit(GetLayout(e.Window()), std::move(e));
+  xpp::container::Container::PropagateExit(GetLayout(e.Window()), std::move(e));
 }
 
 void MainFrame::OnMouseEntered(xpp::ui::EnterEvent e) {
-  xpp::component::Container::PropagateEntry(GetLayout(e.Window()),
+  xpp::container::Container::PropagateEntry(GetLayout(e.Window()),
                                             std::move(e));
 }
 
 bool MainFrame::OnMouseMotion(xpp::ui::MotionEvent e) {
-  return xpp::component::Container::PropagateMotion(GetLayout(e.Window()),
+  return xpp::container::Container::PropagateMotion(GetLayout(e.Window()),
                                                     std::move(e));
 }
 
 bool MainFrame::OnClick(xpp::ui::ClickEvent e) {
-  return xpp::component::Container::PropagateClick(GetLayout(e.Window()),
+  return xpp::container::Container::PropagateClick(GetLayout(e.Window()),
                                                    std::move(e));
 }
 
 bool MainFrame::OnScroll(xpp::ui::ScrollEvent e) {
-  return xpp::component::Container::PropagateScroll(GetLayout(e.Window()),
+  return xpp::container::Container::PropagateScroll(GetLayout(e.Window()),
                                                     std::move(e));
 }
 
@@ -48,22 +48,22 @@ bool MainFrame::IsLayoutStale() {
   return true;
 }
 
-const xpp::component::Container::Layout& MainFrame::GetLayout(
+const xpp::container::Container::Layout& MainFrame::GetLayout(
     const xpp::ui::WindowProxy& w) {
   if (IsLayoutStale()) {
     layout_.clear();
 
-    layout_.push_back(xpp::component::FrameRenderSpace{
+    layout_.push_back(xpp::container::FrameRenderSpace{
         device_frame_.get(),
         {0, 0},
         device_frame_->GetPreferredSize().value()});
 
-    layout_.push_back(xpp::component::FrameRenderSpace{
+    layout_.push_back(xpp::container::FrameRenderSpace{
         line_break_.get(),
         {0, device_frame_->GetPreferredSize()->height},
         {w.GetFrameSize().width, 21}});
 
-    layout_.push_back(xpp::component::FrameRenderSpace{
+    layout_.push_back(xpp::container::FrameRenderSpace{
         station_frame_.get(),
         {0, device_frame_->GetPreferredSize()->height + 21},
         station_frame_->GetPreferredSize().value()});

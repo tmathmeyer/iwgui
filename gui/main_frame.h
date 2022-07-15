@@ -3,7 +3,7 @@
 #include "../iwd/types.h"
 
 #include "xpp/gfx/graphics.h"
-#include "xpp/ui/component/container_utils.h"
+#include "xpp/ui/container/container_utils.h"
 #include "xpp/ui/event.h"
 #include "xpp/ui/frame.h"
 #include "xpp/ui/window_proxy.h"
@@ -24,7 +24,7 @@ class MainFrame {
   friend struct xpp::ui::FrameFactory<MainFrame>;
   MainFrame(std::shared_ptr<base::dbus::Connection>);
 
-  const xpp::component::Container::Layout& GetLayout(
+  const xpp::container::Container::Layout& GetLayout(
       const xpp::ui::WindowProxy&);
   bool IsLayoutStale();
 
@@ -32,7 +32,7 @@ class MainFrame {
   xpp::ui::FramePtr device_frame_;
   xpp::ui::FramePtr station_frame_;
   xpp::ui::FramePtr line_break_;
-  xpp::component::Container::Layout layout_;
+  xpp::container::Container::Layout layout_;
 };
 
 }  // namespace iwgui

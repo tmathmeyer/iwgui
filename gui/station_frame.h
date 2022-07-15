@@ -3,7 +3,7 @@
 #include "../iwd/types.h"
 
 #include "xpp/gfx/graphics.h"
-#include "xpp/ui/component/container_utils.h"
+#include "xpp/ui/container/container_utils.h"
 #include "xpp/ui/event.h"
 #include "xpp/ui/frame.h"
 #include "xpp/ui/window_proxy.h"
@@ -26,7 +26,7 @@ class StationFrame {
   friend struct xpp::ui::FrameFactory<StationFrame>;
   StationFrame(std::unique_ptr<iwd::Station> network);
 
-  const xpp::component::Container::Layout& GetLayout(
+  const xpp::container::Container::Layout& GetLayout(
       const xpp::ui::WindowProxy&);
   bool IsLayoutStale();
 
@@ -36,7 +36,7 @@ class StationFrame {
   xpp::ui::FramePtr power_switch_;
 
   std::unique_ptr<iwd::Station> station_;
-  xpp::component::Container::Layout layout_;
+  xpp::container::Container::Layout layout_;
 };
 
 }  // namespace iwgui

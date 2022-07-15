@@ -5,7 +5,7 @@
 
 #include "gui/device_frame.h"
 #include "gui/station_frame.h"
-#include "gui/wifi_frame.h"
+#include "gui/main_frame.h"
 
 int main(int argc, char** argv) {
   auto mons = xpp::ui::XDisplay::GetMonitorSizes();

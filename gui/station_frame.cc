@@ -3,8 +3,8 @@
 #include "ssid_frame.h"
 
 #include "xpp/ui/component/button.h"
-#include "xpp/ui/component/stack_panel.h"
 #include "xpp/ui/component/text_panel.h"
+#include "xpp/ui/container/stack_panel.h"
 
 namespace iwgui {
 
@@ -17,8 +17,8 @@ xpp::ui::FramePtr Station2Frames(iwd::Station* s) {
       result.push_back(
           xpp::ui::FrameFactory<SSIDFrame>::MakeFrame(std::move(net)));
   }
-  return xpp::ui::FrameFactory<xpp::component::StackPanel>::MakeFrame(
-      xpp::component::StackPanel::Direction::kVertical, std::move(result));
+  return xpp::ui::FrameFactory<xpp::container::StackPanel>::MakeFrame(
+      xpp::container::StackPanel::Direction::kVertical, std::move(result));
 }
 
 }  // namespace
@@ -30,30 +30,30 @@ xpp::ui::FramePtr StationFrame::Create(std::unique_ptr<iwd::Station> d) {
 void StationFrame::OnPaint(xpp::ui::WindowProxy w, xpp::gfx::Graphics g) {
   g.SetColor(w.WindowLaF()->FrameBackgroundColor);
   g.FillRect(0, 0, g.size().width, g.size().height);
-  xpp::component::Container::PropagateDraw(GetLayout(w), w, g);
+  xpp::container::Container::PropagateDraw(GetLayout(w), w, g);
 }
 
 void StationFrame::OnMouseExited(xpp::ui::ExitEvent e) {
-  xpp::component::Container::PropagateExit(GetLayout(e.Window()), std::move(e));
+  xpp::container::Container::PropagateExit(GetLayout(e.Window()), std::move(e));
 }
 
 void StationFrame::OnMouseEntered(xpp::ui::EnterEvent e) {
-  xpp::component::Container::PropagateEntry(GetLayout(e.Window()),
+  xpp::container::Container::PropagateEntry(GetLayout(e.Window()),
                                             std::move(e));
 }
 
 bool StationFrame::OnMouseMotion(xpp::ui::MotionEvent e) {
-  return xpp::component::Container::PropagateMotion(GetLayout(e.Window()),
+  return xpp::container::Container::PropagateMotion(GetLayout(e.Window()),
                                                     std::move(e));
 }
 
 bool StationFrame::OnClick(xpp::ui::ClickEvent e) {
-  return xpp::component::Container::PropagateClick(GetLayout(e.Window()),
+  return xpp::container::Container::PropagateClick(GetLayout(e.Window()),
                                                    std::move(e));
 }
 
 bool StationFrame::OnScroll(xpp::ui::ScrollEvent e) {
-  return xpp::component::Container::PropagateScroll(GetLayout(e.Window()),
+  return xpp::container::Container::PropagateScroll(GetLayout(e.Window()),
                                                     std::move(e));
 }
 
@@ -66,7 +66,7 @@ bool StationFrame::IsLayoutStale() {
   return true;
 }
 
-const xpp::component::Container::Layout& StationFrame::GetLayout(
+const xpp::container::Container::Layout& StationFrame::GetLayout(
     const xpp::ui::WindowProxy& w) {
   if (IsLayoutStale()) {
     layout_.clear();
@@ -80,17 +80,17 @@ const xpp::component::Container::Layout& StationFrame::GetLayout(
             {power_width, 60}});
 
     */
-    layout_.push_back(xpp::component::FrameRenderSpace{
+    layout_.push_back(xpp::container::FrameRenderSpace{
         refresh_button_.get(),
         {w.GetFrameSize().width - power_width - refresh_width, 0},
         {refresh_width, 60}});
 
-    layout_.push_back(xpp::component::FrameRenderSpace{
+    layout_.push_back(xpp::container::FrameRenderSpace{
         title_.get(),
         {20, 0},
         {w.GetFrameSize().width - power_width - refresh_width - 20, 60}});
 
-    layout_.push_back(xpp::component::FrameRenderSpace{
+    layout_.push_back(xpp::container::FrameRenderSpace{
         ssid_list_.get(),
         {20, 60},
         {w.GetFrameSize().width - 20, ssid_list_->GetPreferredSize()->height}});
