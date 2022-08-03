@@ -26,6 +26,8 @@ class StationFrame {
   friend struct xpp::ui::FrameFactory<StationFrame>;
   StationFrame(std::unique_ptr<iwd::Station> network);
 
+  void Refresh();
+
   const xpp::container::Container::Layout& GetLayout(
       const xpp::ui::WindowProxy&);
   bool IsLayoutStale();

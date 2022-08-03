@@ -8,7 +8,7 @@ xpp::ui::FramePtr DeviceFrame::Create(std::unique_ptr<iwd::Device> d) {
 }
 
 void DeviceFrame::OnPaint(xpp::ui::WindowProxy w, xpp::gfx::Graphics g) {
-  g.SetColor(w.WindowLaF()->FrameBackgroundColor);
+  g.SetColor(w.WindowLaF()->FrameDefaultColor);
   g.FillRect(0, 0, g.size().width, g.size().height);
 
   g.SetFont("Fantasque Sans Mono", 8);

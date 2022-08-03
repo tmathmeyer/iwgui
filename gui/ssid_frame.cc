@@ -4,7 +4,7 @@
 namespace iwgui {
 
 void SSIDFrame::OnPaint(xpp::ui::WindowProxy w, xpp::gfx::Graphics g) {
-  g.SetColor(w.WindowLaF()->FrameBackgroundColor);
+  g.SetColor(w.WindowLaF()->FrameDefaultColor);
   g.FillRect(0, 0, g.size().width, g.size().height);
   if (hovered_) {
     g.SetColor(w.WindowLaF()->TextButtonMouseoverColor);

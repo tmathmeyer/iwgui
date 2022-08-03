@@ -7,7 +7,7 @@
 namespace iwgui {
 
 void MainFrame::OnPaint(xpp::ui::WindowProxy w, xpp::gfx::Graphics g) {
-  g.SetColor(w.WindowLaF()->FrameBackgroundColor);
+  g.SetColor(w.WindowLaF()->FrameDefaultColor);
   g.FillRect(0, 0, g.size().width, g.size().height);
   xpp::container::Container::PropagateDraw(GetLayout(w), w, g);
 }

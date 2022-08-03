@@ -28,7 +28,7 @@ xpp::ui::FramePtr StationFrame::Create(std::unique_ptr<iwd::Station> d) {
 }
 
 void StationFrame::OnPaint(xpp::ui::WindowProxy w, xpp::gfx::Graphics g) {
-  g.SetColor(w.WindowLaF()->FrameBackgroundColor);
+  g.SetColor(w.WindowLaF()->FrameDefaultColor);
   g.FillRect(0, 0, g.size().width, g.size().height);
   xpp::container::Container::PropagateDraw(GetLayout(w), w, g);
 }
@@ -73,13 +73,7 @@ const xpp::container::Container::Layout& StationFrame::GetLayout(
 
     uint32_t refresh_width = refresh_button_->GetPreferredSize()->width;
     uint32_t power_width = power_switch_->GetPreferredSize()->width;
-    /*
-        layout_.push_back(xpp::component::FrameRenderSpace{
-            power_switch_.get(),
-            {w.GetFrameSize().width - power_width, 0},
-            {power_width, 60}});
 
-    */
     layout_.push_back(xpp::container::FrameRenderSpace{
         refresh_button_.get(),
         {w.GetFrameSize().width - power_width - refresh_width, 0},
@@ -98,10 +92,15 @@ const xpp::container::Container::Layout& StationFrame::GetLayout(
   return layout_;
 }
 
+
+
 StationFrame::StationFrame(std::unique_ptr<iwd::Station> station)
     : ssid_list_(Station2Frames(station.get())),
       title_(xpp::component::TextPanel::Create("Networks", 8)),
       refresh_button_(xpp::component::Button::Create("reload")),
-      power_switch_(xpp::component::TextPanel::Create("P", 8)) {}
+      power_switch_(xpp::component::TextPanel::Create("P", 8)),
+      station_(std::move(station)) {
+  //refresh_button_->SetClickEvent(base::BindRepeating(&StationFrame::Refresh, this));
+}
 
 }  // namespace iwgui
