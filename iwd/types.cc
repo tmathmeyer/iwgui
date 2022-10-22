@@ -1,6 +1,8 @@
 
 #include "types.h"
 
+#include "base/check.h"
+
 namespace iwd {
 
 std::unique_ptr<Adapter> Adapter::CreateFromProxy(
@@ -122,7 +124,9 @@ std::optional<std::unique_ptr<Network>> Station::GetConnectedNetwork() {
 
 std::vector<std::unique_ptr<Network>> Station::GetOrderedNetworks() {
   using Element = std::tuple<std::unique_ptr<Network>, ssize_t>;
-
+  
+  CHECK(!!this);
+  CHECK(!!self_);
   auto entries = self_->Call<std::vector<Element>>("GetOrderedNetworks");
   if (!entries.has_value())
     return {};

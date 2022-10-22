@@ -1,26 +1,38 @@
 
 #include "base/dbus/dbus.h"
-#include "base/tracing/trace.h"
 #include "xpp/ui/window.h"
+#include "xpp/xlib/xdisplay.h"
 
-#include "gui/device_frame.h"
-#include "gui/station_frame.h"
-#include "gui/main_frame.h"
+#include "gui/main_panel.h"
 
 int main(int argc, char** argv) {
-  auto mons = xpp::ui::XDisplay::GetMonitorSizes();
-  if (mons.size() == 0)
+  const auto monitors = xpp::xlib::XDisplay::GetMonitorSizes();
+  if (monitors.size() == 0)
     return 1;
 
-  auto dimensions = mons.begin()->second;
+  const auto dimensions = monitors.begin()->second;
   auto window =
-      xpp::ui::Window::Create(xpp::ui::Window::WindowType::kDesktopDock,
-                              xpp::ui::Window::PositionPin::kTopCenter,
-                              /*size=*/{400, 400},
-                              /*position=*/{dimensions.width / 2, 0});
+      xpp::ui::XWindow::Create(xpp::ui::XWindow::WindowType::kDesktopDock,
+                               xpp::ui::XWindow::PositionPin::kTopCenter,
+                               {800, 500}, {dimensions.width / 2, 0});
 
-  window.SetDefaultFrame(xpp::ui::FrameFactory<iwgui::MainFrame>::MakeFrame(
+  window->GetLookAndFeel()->SetColor("SSIDConnectedTextPressed",
+                                     xpp::gfx::Color::BLUE.Darker(0.4));
+  window->GetLookAndFeel()->SetColor("SSIDConnectedTextHovered",
+                                     xpp::gfx::Color::BLUE.Darker(0.7));
+  window->GetLookAndFeel()->SetColor("SSIDConnectedTextDefault",
+                                     xpp::gfx::Color::BLUE);
+
+  window->GetLookAndFeel()->SetColor("SSIDDisonnectedTextPressed",
+                                     xpp::gfx::Color::GRAY2.Darker(0.4));
+  window->GetLookAndFeel()->SetColor("SSIDDisonnectedTextHovered",
+                                     xpp::gfx::Color::GRAY2.Darker(0.7));
+  window->GetLookAndFeel()->SetColor("SSIDDisonnectedTextDefault",
+                                     xpp::gfx::Color::GRAY2);
+
+  window->GetLookAndFeel()->SetColor("ScrollbarColor", xpp::gfx::Color::BLUE);
+
+  window->AddComponent(std::make_unique<iwgui::MainPanel>(
       base::dbus::Connection::GetSystemConnection()));
-
-  std::move(window).SetVisibleAndStartEventLoop();
+  window->SetVisible(true);
 }

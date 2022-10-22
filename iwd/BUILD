@@ -1,18 +1,22 @@
 langs("C")
 
 cpp_header (
-  name = "types_h",
+  name = "include",
   srcs = [ "types.h" ],
+  deps = [
+    "//base/dbus:include",
+  ],
 )
 
-cpp_object (
+cc_object (
   name = "types",
   srcs = [
     "types.cc",
   ],
+  includes = [
+    ":include",
+  ],
   deps = [
-    ":types_h",
     "//base/dbus:dbus",
-    "//base/dbus:dbus_headers",
   ],
 )

@@ -1,65 +1,28 @@
 langs("C")
 
 cpp_header (
-  name = "ui_headers",
+  name = "include",
   srcs = [
-    "device_frame.h",
-    "ssid_frame.h",
-    "station_frame.h",
-    "main_frame.h",
+    "main_panel.h",
+    "ssid_entry.h",
+    "station_panel.h",
   ],
   deps = [
-    "//iwgui/iwd:types_h",
-    "//base/dbus:dbus_headers",
-    "//xpp/gfx:graphics_header",
-    "//xpp/ui/container:container_include",
-    "//xpp/ui/component:component_include",
-  ]
-)
-
-cpp_object (
-  name = "ssid_frame",
-  srcs = [
-    "ssid_frame.cc"
-  ],
-  deps = [
-    ":ui_headers",
+    "//iwgui/iwd:include",
+    "//xpp/gfx:include",
   ],
 )
 
-cpp_object (
-  name = "device_frame",
+cc_object (
+  name = "libiwgui",
   srcs = [
-    "device_frame.cc"
+    "main_panel.cc",
+    "ssid_entry.cc",
+    "station_panel.cc",
   ],
-  deps = [
-    ":ui_headers",
-  ],
-)
-
-cpp_object (
-  name = "station_frame",
-  srcs = [
-    "station_frame.cc"
-  ],
-  deps = [
-    ":ui_headers",
-    ":ssid_frame",
-    "//xpp/ui/component:text_panel",
-    "//xpp/ui/container:stack_panel",
-    "//xpp/ui/component:button",
-  ],
-)
-
-cpp_object (
-  name = "main_frame",
-  srcs = [
-    "main_frame.cc"
-  ],
-  deps = [
-    ":ui_headers",
-    ":device_frame",
-    ":station_frame",
-    "//xpp/ui/component:line_break_panel",
+  includes = [
+    ":include",
+    "//xpp/ui:include",
+    "//xpp/ui/layout:include",
   ],
 )

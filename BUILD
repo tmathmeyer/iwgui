@@ -1,15 +1,17 @@
 langs("C")
 
-cpp_binary (
+cc_binary (
   name = "iwgui",
   srcs = [ "iwgui.cc" ],
+  includes = [
+    "//iwgui/iwd:include",
+    "//iwgui/gui:include",
+    "//xpp/ui:include",
+    "//xpp/xlib:include",
+  ],
   deps = [
     "//iwgui/iwd:types",
-    "//iwgui/iwd:types_h",
-    "//iwgui/gui:main_frame",
-    "//iwgui/gui:ui_headers",
-
-    "//xpp/ui:ui_include",
-    "//xpp/ui:window",
+    "//iwgui/gui:libiwgui",
+    "//xpp/ui:xpp-uilib",
   ],
 )
