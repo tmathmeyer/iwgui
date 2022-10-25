@@ -7,7 +7,7 @@
 namespace iwgui {
 
 StationPanel::StationPanel(std::unique_ptr<iwd::Station> station)
-    : xpp::ui::XScrollPanel(), station_(std::move(station)) {
+    : xpp::ui::XPanel(), station_(std::move(station)) {
   CHECK(station_);
   Update();
 }
@@ -26,7 +26,7 @@ void StationPanel::Paint(xpp::ui::Graphics* g) {
 }
 
 std::optional<xpp::gfx::Rect> StationPanel::GetPreferredSize() const {
-  return std::nullopt;
+  return xpp::gfx::Rect{750, XPanel::CalculatePreferredSize().height};
 }
 
 }  // namespace iwgui

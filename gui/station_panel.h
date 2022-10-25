@@ -2,11 +2,10 @@
 
 #include "../iwd/types.h"
 #include "xpp/ui/panel.h"
-#include "xpp/ui/scroll_panel.h"
 
 namespace iwgui {
 
-class StationPanel : public xpp::ui::XScrollPanel {
+class StationPanel : public xpp::ui::XPanel {
  public:
   StationPanel(std::unique_ptr<iwd::Station> station);
   void Paint(xpp::ui::Graphics* g) override;

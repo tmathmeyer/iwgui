@@ -19,7 +19,7 @@ class MainPanelExitListener : public xpp::ui::MouseMotionListener {
 };
 
 MainPanel::MainPanel(std::shared_ptr<base::dbus::Connection> connection)
-    : xpp::ui::XPanel(), connection_(std::move(connection)) {
+    : xpp::ui::XScrollPanel(), connection_(std::move(connection)) {
   this->AddMouseMotionListener(std::make_unique<MainPanelExitListener>());
   for (auto& device : iwd::Device::GetAll(connection_)) {
     // Add a device view

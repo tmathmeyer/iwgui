@@ -16,6 +16,8 @@ int main(int argc, char** argv) {
                                xpp::ui::XWindow::PositionPin::kTopCenter,
                                {800, 500}, {dimensions.width / 2, 0});
 
+  window->GetLookAndFeel()->SetColor("DevicePropertyTextColor",
+                                     xpp::gfx::Color::GRAY4);
   window->GetLookAndFeel()->SetColor("SSIDConnectedTextPressed",
                                      xpp::gfx::Color::BLUE.Darker(0.4));
   window->GetLookAndFeel()->SetColor("SSIDConnectedTextHovered",
