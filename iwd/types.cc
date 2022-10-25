@@ -2,9 +2,36 @@
 #include "types.h"
 
 #include "base/check.h"
+#include "base/json/json.h"
 
 namespace iwd {
 
+// static
+std::vector<std::unique_ptr<Device>> Device::GetAll(
+    std::shared_ptr<base::dbus::Connection> conn) {
+  std::vector<std::unique_ptr<Device>> result;
+  CHECK(conn != nullptr);
+  auto mgr =
+      conn->GetInterface<base::dbus::ObjectManager>("net.connman.iwd", "/");
+  if (!mgr)
+    return result;
+
+  auto objs = mgr->GetManagedObjects();
+  if (!objs.has_value())
+    return result;
+
+  for (const auto& [path, value] : objs->Values()) {
+    auto dict = base::json::Unpack<base::json::Object>(base::json::Copy(value));
+    if (!dict.has_value())
+      continue;
+    if (dict->HasKey("net.connman.iwd.Device"))
+      result.push_back(conn->GetInterface<Device>("net.connman.iwd", path));
+  }
+
+  return result;
+}
+
+// static
 std::unique_ptr<Adapter> Adapter::CreateFromProxy(
     const base::dbus::ObjectProxy& ns) {
   return ns.Create<Adapter, std::string, std::string, std::string, bool>(
@@ -40,6 +67,10 @@ Device::Device(base::dbus::ObjectProxy::Storage self,
   name_ = name;
   powered_ = powered;
   adapter_ = std::move(adapter);
+}
+
+std::unique_ptr<Station> Device::GetAssociatedStation() {
+  return Station::CreateFromProxy(*self_);
 }
 
 std::unique_ptr<Adapter> Device::GetAdapter() {
@@ -116,6 +147,10 @@ Station::Station(base::dbus::ObjectProxy::Storage self,
   network_ = std::move(network);
 }
 
+std::unique_ptr<Device> Station::GetAssociatedDevice() {
+  return Device::CreateFromProxy(*self_);
+}
+
 std::optional<std::unique_ptr<Network>> Station::GetConnectedNetwork() {
   if (!network_.has_value())
     return std::nullopt;
@@ -124,7 +159,7 @@ std::optional<std::unique_ptr<Network>> Station::GetConnectedNetwork() {
 
 std::vector<std::unique_ptr<Network>> Station::GetOrderedNetworks() {
   using Element = std::tuple<std::unique_ptr<Network>, ssize_t>;
-  
+
   CHECK(!!this);
   CHECK(!!self_);
   auto entries = self_->Call<std::vector<Element>>("GetOrderedNetworks");

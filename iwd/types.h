@@ -8,6 +8,8 @@
 
 namespace iwd {
 
+class Station;
+
 class Adapter {
  public:
   static const char* GetTypeName() { return "net.connman.iwd.Adapter"; }
@@ -35,6 +37,8 @@ class Adapter {
 
 class Device {
  public:
+  static std::vector<std::unique_ptr<Device>> GetAll(
+      std::shared_ptr<base::dbus::Connection>);
   static const char* GetTypeName() { return "net.connman.iwd.Device"; }
   static std::unique_ptr<Device> CreateFromProxy(
       const base::dbus::ObjectProxy& ns);
@@ -45,6 +49,7 @@ class Device {
          bool powered,
          base::dbus::ObjectProxy::Storage adapter);
 
+  std::unique_ptr<Station> GetAssociatedStation();
   std::unique_ptr<Adapter> GetAdapter();
   const std::string& Address() { return address_; }
   const std::string& Name() { return name_; }
@@ -129,6 +134,7 @@ class Station {
           bool scanning,
           base::dbus::ObjectProxy::MaybeStorage network);
 
+  std::unique_ptr<Device> GetAssociatedDevice();
   std::optional<std::unique_ptr<Network>> GetConnectedNetwork();
   const std::string& State() { return state_; }
   bool Scanning() { return scanning_; }

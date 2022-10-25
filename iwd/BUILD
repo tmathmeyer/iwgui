@@ -5,6 +5,7 @@ cpp_header (
   srcs = [ "types.h" ],
   deps = [
     "//base/dbus:include",
+    "//base/json:include",
   ],
 )
 
@@ -18,5 +19,6 @@ cc_object (
   ],
   deps = [
     "//base/dbus:dbus",
+    "//base/json:json",
   ],
 )

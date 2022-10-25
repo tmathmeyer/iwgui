@@ -1,6 +1,7 @@
 
 #include "main_panel.h"
 
+#include "device_panel.h"
 #include "ssid_entry.h"
 #include "station_panel.h"
 #include "xpp/ui/button_listener.h"
@@ -20,9 +21,12 @@ class MainPanelExitListener : public xpp::ui::MouseMotionListener {
 MainPanel::MainPanel(std::shared_ptr<base::dbus::Connection> connection)
     : xpp::ui::XPanel(), connection_(std::move(connection)) {
   this->AddMouseMotionListener(std::make_unique<MainPanelExitListener>());
-  this->AddComponent(
-      std::make_unique<StationPanel>(connection_->GetInterface<iwd::Station>(
-          "net.connman.iwd", "/net/connman/iwd/0/4")));
+  for (auto& device : iwd::Device::GetAll(connection_)) {
+    // Add a device view
+    auto station = device->GetAssociatedStation();
+    this->AddComponent(std::make_unique<DevicePanel>(std::move(device)));
+    this->AddComponent(std::make_unique<StationPanel>(std::move(station)));
+  }
 }
 
 void MainPanel::Paint(xpp::ui::Graphics* g) {

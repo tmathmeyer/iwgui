@@ -8,6 +8,7 @@ namespace iwgui {
 
 StationPanel::StationPanel(std::unique_ptr<iwd::Station> station)
     : xpp::ui::XScrollPanel(), station_(std::move(station)) {
+  CHECK(station_);
   Update();
 }
 
