@@ -30,11 +30,7 @@ MainPanel::MainPanel(std::shared_ptr<base::dbus::Connection> connection)
 }
 
 void MainPanel::Paint(xpp::ui::Graphics* g) {
-  xpp::ui::XPanel::Paint(g);
-}
-
-std::optional<xpp::gfx::Rect> MainPanel::GetPreferredSize() const {
-  return std::nullopt;
+  xpp::ui::XScrollPanel::Paint(g);
 }
 
 }  // namespace iwgui

@@ -9,7 +9,7 @@ class StationPanel : public xpp::ui::XPanel {
  public:
   StationPanel(std::unique_ptr<iwd::Station> station);
   void Paint(xpp::ui::Graphics* g) override;
-  std::optional<xpp::gfx::Rect> GetPreferredSize() const override;
+  std::optional<xpp::gfx::Rect> GetPreferredSize() override;
 
   void Update();
 

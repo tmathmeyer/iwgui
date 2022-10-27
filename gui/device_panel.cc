@@ -4,37 +4,62 @@
 
 #include "ssid_entry.h"
 #include "xpp/ui/button_listener.h"
-#include "xpp/ui/layout/accordion_layout.h"
 
 namespace iwgui {
 
-DevicePanel::DevicePanel(std::unique_ptr<iwd::Device> device)
-    : xpp::ui::XPanel(), device_(std::move(device)) {
-  CHECK(device_);
-}
+namespace {
 
-void DevicePanel::Paint(xpp::ui::Graphics* g) {
-  xpp::ui::XPanel::Paint(g);
-  g->SetFont("Fantasque Sans Mono");
-  uint16_t fontsize = 8;
-  g->SetFontSize(fontsize);
-  g->SetColor("DevicePropertyTextColor");
-
-  std::stringstream sstream;
-  sstream << device_->Name() << " (" << device_->Address() << ")";
-  g->DrawText({10, 0}, sstream.str());
-  if (device_->Powered()) {
-    auto adapter = device_->GetAdapter();
-    g->DrawText({30, 40}, adapter->Model());
-    g->DrawText({30, 80}, adapter->Name());
-    g->DrawText({30, 120}, adapter->Vendor());
-  } else {
-    g->DrawText({30, 40}, "Powered Off");
+class DeviceInfoView : public xpp::ui::XPanel {
+ public:
+  DeviceInfoView(std::unique_ptr<iwd::Device> device)
+      : device_(std::move(device)) {
+    if (device_->Powered())
+      prev_max_len_ = device_->GetAdapter()->Model().length();
+    else
+      prev_max_len_ = 11;
   }
+
+  void Paint(xpp::ui::Graphics* g) override {
+    g->SetFontSize(8);
+    g->SetColor("DevicePropertyTextColor");
+    if (device_->Powered()) {
+      auto adapter = device_->GetAdapter();
+      auto model = adapter->Model();
+      auto name = adapter->Name();
+      auto vendor = adapter->Vendor();
+      g->DrawText({30, 0}, model);
+      g->DrawText({30, 40}, name);
+      g->DrawText({30, 80}, vendor);
+      prev_max_len_ =
+          std::max(model.length(), std::max(name.length(), vendor.length()));
+    } else {
+      prev_max_len_ = 11;
+      g->DrawText({30, 0}, "Powered Off");
+    }
+  }
+
+  std::optional<uint32_t> GetPreferredHeight() override { return 120; }
+
+  std::optional<uint32_t> GetPreferredWidth() override {
+    return prev_max_len_ * 8 * 2.42 + 30;
+  }
+
+ private:
+  std::unique_ptr<iwd::Device> device_;
+  uint32_t prev_max_len_ = 0;
+};
+
+std::string RenderDeviceLabel(iwd::Device* device) {
+  std::stringstream sstream;
+  sstream << device->Name() << " (" << device->Address() << ")";
+  return sstream.str();
 }
 
-std::optional<xpp::gfx::Rect> DevicePanel::GetPreferredSize() const {
-  return xpp::gfx::Rect{750, 160};
+}  // namespace
+
+DevicePanel::DevicePanel(std::unique_ptr<iwd::Device> device)
+    : xpp::ui::XAccordion(RenderDeviceLabel(device.get()), 10) {
+  AddComponent(std::make_unique<DeviceInfoView>(std::move(device)));
 }
 
 }  // namespace iwgui

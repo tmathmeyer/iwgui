@@ -34,12 +34,12 @@ void SSIDEntry::Paint(xpp::ui::Graphics* g) {
   g->DrawText({20, topoffset}, network_->Name());
 }
 
-std::optional<uint32_t> SSIDEntry::GetPreferredHeight() const {
+std::optional<uint32_t> SSIDEntry::GetPreferredHeight() {
   return 50;
 }
 
-std::optional<uint32_t> SSIDEntry::GetPreferredWidth() const {
-  return 20 + (network_->Name().length() * 8 * 2.5);
+std::optional<uint32_t> SSIDEntry::GetPreferredWidth() {
+  return 20 + (network_->Name().length() * 8 * 2.42);
 }
 
 void SSIDEntry::Enter() {

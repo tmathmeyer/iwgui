@@ -2,7 +2,6 @@
 
 #include "ssid_entry.h"
 #include "xpp/ui/button_listener.h"
-#include "xpp/ui/layout/accordion_layout.h"
 
 namespace iwgui {
 
@@ -25,8 +24,8 @@ void StationPanel::Paint(xpp::ui::Graphics* g) {
   xpp::ui::XPanel::Paint(g);
 }
 
-std::optional<xpp::gfx::Rect> StationPanel::GetPreferredSize() const {
-  return xpp::gfx::Rect{750, XPanel::CalculatePreferredSize().height};
+std::optional<xpp::gfx::Rect> StationPanel::GetPreferredSize() {
+  return XPanel::CalculatePreferredSize();
 }
 
 }  // namespace iwgui

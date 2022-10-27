@@ -9,8 +9,8 @@ class SSIDEntry : public xpp::ui::XComponent {
  public:
   SSIDEntry(std::unique_ptr<iwd::Network> network);
   void Paint(xpp::ui::Graphics* g) override;
-  std::optional<uint32_t> GetPreferredHeight() const override;
-  std::optional<uint32_t> GetPreferredWidth() const override;
+  std::optional<uint32_t> GetPreferredHeight() override;
+  std::optional<uint32_t> GetPreferredWidth() override;
 
   void Enter();
   void Exit();
