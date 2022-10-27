@@ -114,6 +114,8 @@ class Network {
 
   void Connect() { self_->Call<>("Connect"); }
 
+  std::unique_ptr<Network> Refresh();
+
  private:
   std::string type_;
   std::string name_;

@@ -21,14 +21,14 @@ int main(int argc, char** argv) {
   window->GetLookAndFeel()->SetColor("SSIDConnectedTextPressed",
                                      xpp::gfx::Color::BLUE.Darker(0.4));
   window->GetLookAndFeel()->SetColor("SSIDConnectedTextHovered",
-                                     xpp::gfx::Color::BLUE.Darker(0.7));
+                                     xpp::gfx::Color::GREEN.Darker(0.7));
   window->GetLookAndFeel()->SetColor("SSIDConnectedTextDefault",
                                      xpp::gfx::Color::BLUE);
 
   window->GetLookAndFeel()->SetColor("SSIDDisonnectedTextPressed",
                                      xpp::gfx::Color::GRAY2.Darker(0.4));
   window->GetLookAndFeel()->SetColor("SSIDDisonnectedTextHovered",
-                                     xpp::gfx::Color::GRAY2.Darker(0.7));
+                                     xpp::gfx::Color::GREEN.Darker(0.7));
   window->GetLookAndFeel()->SetColor("SSIDDisonnectedTextDefault",
                                      xpp::gfx::Color::GRAY2);
 

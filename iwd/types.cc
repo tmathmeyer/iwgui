@@ -130,6 +130,10 @@ std::optional<std::unique_ptr<KnownNetwork>> Network::GetKnownNetwork() {
   return KnownNetwork::CreateFromProxy(**known_network_);
 }
 
+std::unique_ptr<Network> Network::Refresh() {
+  return Network::CreateFromProxy(*self_);
+}
+
 std::unique_ptr<Station> Station::CreateFromProxy(
     const base::dbus::ObjectProxy& ns) {
   return ns.Create<Station, std::string, bool,

@@ -24,14 +24,14 @@ class DeviceInfoView : public xpp::ui::XPanel {
     g->SetColor("DevicePropertyTextColor");
     if (device_->Powered()) {
       auto adapter = device_->GetAdapter();
-      auto model = adapter->Model();
-      auto name = adapter->Name();
-      auto vendor = adapter->Vendor();
+      auto model = "Model: " + adapter->Model();
+      auto address = "Address: " + device_->Address();
+      auto vendor = "Vendor: " + adapter->Vendor();
       g->DrawText({30, 0}, model);
-      g->DrawText({30, 40}, name);
+      g->DrawText({30, 40}, address);
       g->DrawText({30, 80}, vendor);
       prev_max_len_ =
-          std::max(model.length(), std::max(name.length(), vendor.length()));
+          std::max(model.length(), std::max(address.length(), vendor.length()));
     } else {
       prev_max_len_ = 11;
       g->DrawText({30, 0}, "Powered Off");
@@ -51,7 +51,7 @@ class DeviceInfoView : public xpp::ui::XPanel {
 
 std::string RenderDeviceLabel(iwd::Device* device) {
   std::stringstream sstream;
-  sstream << device->Name() << " (" << device->Address() << ")";
+  sstream << device->Name() << " (" << device->GetAdapter()->Name() << ")";
   return sstream.str();
 }
 

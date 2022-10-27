@@ -12,6 +12,7 @@ SSIDEntry::SSIDEntry(std::unique_ptr<iwd::Network> network)
 }
 
 void SSIDEntry::Paint(xpp::ui::Graphics* g) {
+  network_ = std::move(network_)->Refresh();
   if (network_->Connected()) {
     if (pressed_)
       g->SetColor("SSIDConnectedTextPressed");
@@ -60,6 +61,17 @@ void SSIDEntry::Press() {
 void SSIDEntry::Release() {
   hovered_ = true;
   pressed_ = false;
+  if (!network_->Connected()) {
+    auto known = network_->GetKnownNetwork();
+    if (known.has_value()) {
+      network_->Connect();
+      Repaint();
+    } else {
+      puts("Unknown Network!");
+    }
+  } else {
+    puts("Already Connected!");
+  }
 }
 
 }  // namespace iwgui
