@@ -6,6 +6,9 @@
 #include "gui/main_panel.h"
 
 int main(int argc, char** argv) {
+  (void) argc;
+  (void) argv;
+
   const auto monitors = xpp::xlib::XDisplay::GetMonitorSizes();
   if (monitors.size() == 0)
     return 1;
